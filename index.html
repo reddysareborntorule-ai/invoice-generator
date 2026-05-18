@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Meghan Capco Engineers - Tax Invoice</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #e9ecef;
+}
+
+.container {
+    max-width: 1400px;
+    margin: auto;
+}
+
+.form-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.form-section h2 {
+    margin-top: 0;
+    color: #1a2c3e;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 5px;
+    margin-bottom: 12px;
+    border: 1px solid #adb5bd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    padding: 10px 24px;
+    cursor: pointer;
+    border: none;
+    background: #1a2c3e;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #0f1b26;
+}
+
+.add-product {
+    background: #2c3e50;
+}
+
+/* Invoice page - Using custom large size to fit everything */
+.invoice-page {
+    width: 240mm; /* Wider than A4 */
+    min-height: 350mm; /* Taller than A4 */
+    background: #fff;
+    margin: auto;
+    padding: 8mm 10mm; /* Slightly reduced padding */
+    border: 2px solid #212529;
+    page-break-after: always;
+    box-sizing: border-box;
+    position: relative;
+    font-size: 11px; /* Slightly smaller base font */
+}
+
+.title {
+    text-align: center;
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.title h1 {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: 1px;
+}
+
+.title h3 {
+    margin: 2px 0;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.original {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-style: italic;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.top-grid {
+    display: grid;
+    grid-template-columns: 52% 48%;
+    border: 1px solid #000;
+    margin-top: 8px;
+}
+
+.left-box {
+    border-right: 1px solid #000;
+}
+
+.company-box {
+    padding: 6px 8px;
+    border-bottom: 1px solid #000;
+    line-height: 1.3;
+    font-size: 10px;
+}
+
+.company-name {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.meta-table {
+    width: 100%;
+    border-collapse: collapse;
+    height: 100%;
+}
+
+.meta-table td {
+    border: 1px solid #000;
+    padding: 4px 6px;
+    font-size: 10px;
+    vertical-align: top;
+    line-height: 1.3;
+}
+
+.meta-table b {
+    font-size: 11px;
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+
+.product-table th,
+.product-table td {
+    border: 1px solid #000;
+    padding: 4px 5px;
+    font-size: 10px;
+}
+
+.product-table th {
+    text-align: center;
+    background: #f0f0f0;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+.right {
+    text-align: right;
+}
+
+.center {
+    text-align: center;
+}
+
+.total-row td {
+    font-weight: bold;
+    background: #f8f8f8;
+}
+
+.amount-words {
+    border: 1px solid #000;
+    padding: 6px 8px;
+    margin-top: 6px;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.tax-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+}
+
+.tax-table td,
+.tax-table th {
+    border: 1px solid #000;
+    padding: 4px 5px;
+    font-size: 10px;
+}
+
+.tax-table th {
+    background: #f0f0f0;
+}
+
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    border: 1px solid #000;
+    margin-top: 8px;
+    min-height: 120px;
+}
+
+.bottom-box {
+    padding: 8px;
+    border-right: 1px solid #000;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.bottom-box:last-child {
+    border-right: none;
+}
+
+.bottom-box b {
+    font-size: 10px;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 9px;
+    color: #495057;
+}
+
+.terms-list {
+    margin: 3px 0 0 15px;
+    padding-left: 0;
+    font-size: 9px;
+}
+
+.terms-list li {
+    margin-bottom: 2px;
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: #fff;
+        padding: 0;
+        margin: 0;
+    }
+    .form-section,
+    .download-btn {
+        display: none;
+    }
+    .invoice-page {
+        border: none;
+        margin: 0;
+        padding: 8mm 10mm;
+        page-break-after: always;
+        width: 100%;
+        min-height: auto;
+    }
+}
+
+.product-table tr {
+    page-break-inside: avoid;
+}
+
+/* Scrollable container for preview */
+#invoiceContainer {
+    overflow-x: auto;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="form-section">
+    <h2>MEGHAN CAPCO ENGINEERS - TAX INVOICE GENERATOR</h2>
+    
+    <h3>Invoice Details</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+            <label>Invoice No *</label>
+            <input id="invoiceNo" placeholder="Enter Invoice Number">
+        </div>
+        <div>
+            <label>Invoice Date *</label>
+            <input id="invoiceDate" type="date">
+        </div>
+        <div>
+            <label>Delivery Note</label>
+            <input id="deliveryNote" placeholder="Delivery Note (Optional)">
+        </div>
+        <div>
+            <label>Mode/Terms of Payment</label>
+            <input id="paymentTerms" placeholder="Payment Terms (Optional)">
+        </div>
+        <div>
+            <label>Reference No & Date</label>
+            <input id="referenceNo" placeholder="Reference No & Date (Optional)">
+        </div>
+        <div>
+            <label>Other References</label>
+            <input id="otherReferences" placeholder="Other References (Optional)">
+        </div>
+        <div>
+            <label>Buyer's Order No</label>
+            <input id="buyersOrderNo" placeholder="Buyer Order No (Optional)">
+        </div>
+        <div>
+            <label>Buyer's Order Date</label>
+            <input id="buyersOrderDate" placeholder="Buyer Order Date (Optional)">
+        </div>
+        <div>
+            <label>Dispatch Doc No</label>
+            <input id="dispatchDocNo" placeholder="Dispatch Doc No (Optional)">
+        </div>
+        <div>
+            <label>Delivery Note Date</label>
+            <input id="deliveryNoteDate" placeholder="Delivery Note Date (Optional)">
+        </div>
+        <div>
+            <label>Dispatched Through</label>
+            <input id="dispatchThrough" placeholder="Dispatched Through (Optional)">
+        </div>
+        <div>
+            <label>Destination</label>
+            <input id="destination" placeholder="Destination (Optional)">
+        </div>
+        <div>
+            <label>Bill of Lading/LR-RR No</label>
+            <input id="lrNo" placeholder="LR-RR No (Optional)">
+        </div>
+        <div>
+            <label>Motor Vehicle No</label>
+            <input id="vehicleNo" placeholder="Vehicle No (Optional)">
+        </div>
+    </div>
+
+    <h3>Consignee (Ship To)</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+            <label>Buyer / Consignee Name *</label>
+            <input id="shipName" placeholder="Enter Name">
+        </div>
+        <div>
+            <label>Mobile Number</label>
+            <input id="shipMobile" placeholder="Mobile Number">
+        </div>
+    </div>
+    <div>
+        <label>Address</label>
+        <textarea id="shipAddress" placeholder="Address" rows="2"></textarea>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+            <label>GSTIN</label>
+            <input id="shipGST" placeholder="GSTIN">
+        </div>
+        <div>
+            <label>State</label>
+            <input id="shipState" placeholder="State">
+        </div>
+    </div>
+
+    <h3>
+        <input type="checkbox" id="sameAddress"> Same Address for Buyer (Bill To)
+    </h3>
+    
+    <div id="buyerFields">
+        <h3>Buyer (Bill To)</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+                <label>Buyer Name *</label>
+                <input id="billName" placeholder="Enter Name">
+            </div>
+            <div>
+                <label>Mobile Number</label>
+                <input id="billMobile" placeholder="Mobile Number">
+            </div>
+        </div>
+        <div>
+            <label>Address</label>
+            <textarea id="billAddress" placeholder="Address" rows="2"></textarea>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+                <label>GSTIN</label>
+                <input id="billGST" placeholder="GSTIN">
+            </div>
+            <div>
+                <label>State</label>
+                <input id="billState" placeholder="State">
+            </div>
+        </div>
+    </div>
+
+    <h3>Products</h3>
+    <div id="products"></div>
+    <button type="button" class="add-product" onclick="addProduct()">+ Add Product</button>
+    <br><br>
+    <button onclick="generateInvoice()" style="background: #28a745;">Generate Invoice</button>
+</div>
+
+<div id="invoiceContainer"></div>
+
+</div>
+
+<script>
+let productCount = 0;
+
+function addProduct() {
+    productCount++;
+    let html = `
+    <div class="product-item" style="border:1px solid #dee2e6; border-radius:8px; margin-bottom:12px; padding:12px; background:#f8f9fa;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong>Product #${productCount}</strong>
+            <button type="button" onclick="removeProduct(this)" style="background:#dc3545; padding:4px 12px; font-size:12px;">Remove</button>
+        </div>
+        <input class="desc" placeholder="Product Description" style="margin-bottom:8px;">
+        <div style="display:flex; gap:10px;">
+            <input class="hsn" placeholder="HSN/SAC Code" style="flex:1;">
+            <input class="qty" type="number" placeholder="Quantity" style="flex:1;" step="any">
+            <input class="rate" type="number" placeholder="Rate (₹)" style="flex:1;" step="any">
+        </div>
+    </div>`;
+    document.getElementById("products").insertAdjacentHTML("beforeend", html);
+}
+
+function removeProduct(button) {
+    button.closest('.product-item').remove();
+}
+
+document.getElementById("sameAddress").addEventListener("change", function() {
+    document.getElementById("buyerFields").style.display = this.checked ? "none" : "block";
+});
+
+function toUpperCaseFields() {
+    document.querySelectorAll("input:not([type='checkbox']):not([type='date']), textarea").forEach(input => {
+        if (input.value && input.type !== "date") input.value = input.value.toUpperCase();
+    });
+}
+
+// ========== NUMBER TO WORDS (Indian System) ==========
+function numberToIndianWords(amount) {
+    if (amount === 0 || isNaN(amount) || amount === null) return "Zero";
+    let num = Math.round(amount);
+    if (num === 0) return "Zero";
+    
+    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", 
+                  "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+    
+    function convertLessThanThousand(n) {
+        if (n === 0) return "";
+        if (n < 20) return ones[n] + " ";
+        if (n < 100) return tens[Math.floor(n / 10)] + " " + (n % 10 !== 0 ? ones[n % 10] + " " : "");
+        return ones[Math.floor(n / 100)] + " Hundred " + (n % 100 !== 0 ? convertLessThanThousand(n % 100) : "");
+    }
+    
+    let crore = Math.floor(num / 10000000);
+    let lakh = Math.floor((num % 10000000) / 100000);
+    let thousand = Math.floor((num % 100000) / 1000);
+    let remainder = num % 1000;
+    
+    let words = "";
+    if (crore > 0) words += convertLessThanThousand(crore) + "Crore ";
+    if (lakh > 0) words += convertLessThanThousand(lakh) + "Lakh ";
+    if (thousand > 0) words += convertLessThanThousand(thousand) + "Thousand ";
+    if (remainder > 0) words += convertLessThanThousand(remainder);
+    
+    words = words.replace(/\s+/g, " ").trim();
+    if (words === "") words = "Zero";
+    
+    let result = words.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+    return result;
+}
+
+function formatCurrency(num) {
+    return Number(num).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function generateInvoice() {
+    toUpperCaseFields();
+    
+    let products = document.querySelectorAll(".product-item");
+    if (products.length === 0) {
+        alert("Please add at least one product!");
+        return;
+    }
+    
+    let rows = "";
+    let taxable = 0;
+    let slno = 0;
+    
+    products.forEach((p) => {
+        let desc = p.querySelector(".desc").value.trim();
+        let hsn = p.querySelector(".hsn").value.trim();
+        let qty = Number(p.querySelector(".qty").value) || 0;
+        let rate = Number(p.querySelector(".rate").value) || 0;
+        let amount = qty * rate;
+        
+        if (qty === 0 || rate === 0) return; // Skip empty products
+        
+        taxable += amount;
+        slno++;
+        rows += `
+        <tr>
+            <td class="center">${slno}</td>
+            <td>
+                <b>${desc || "-"}</b><br>
+                <span style="font-size:9px;">CGST @ 9%</span><br>
+                <span style="font-size:9px;">SGST @ 9%</span>
+            </td>
+            <td>${hsn || "-"}</td>
+            <td class="center">${qty} NOS</td>
+            <td class="right">${formatCurrency(rate)}</td>
+            <td>NOS</td>
+            <td>-</td>
+            <td class="right">
+                ${formatCurrency(amount)}<br>
+                <span style="font-size:9px;">${formatCurrency(amount * 0.09)}</span><br>
+                <span style="font-size:9px;">${formatCurrency(amount * 0.09)}</span>
+            </td>
+        </tr>
+        `;
+    });
+    
+    let cgst = taxable * 0.09;
+    let sgst = taxable * 0.09;
+    let grandTotal = taxable + cgst + sgst;
+    let totalTaxAmount = cgst + sgst;
+    
+    let grandTotalWords = numberToIndianWords(Math.round(grandTotal));
+    let taxWords = numberToIndianWords(Math.round(totalTaxAmount));
+    
+    // Consignee / Ship To data
+    let shipName = (document.getElementById("shipName")?.value || "").toUpperCase();
+    let shipAddress = (document.getElementById("shipAddress")?.value || "").toUpperCase();
+    let shipMobile = (document.getElementById("shipMobile")?.value || "").toUpperCase();
+    let shipGST = (document.getElementById("shipGST")?.value || "").toUpperCase();
+    let shipState = (document.getElementById("shipState")?.value || "").toUpperCase();
+    
+    let same = document.getElementById("sameAddress").checked;
+    let billName = same ? shipName : (document.getElementById("billName")?.value || "").toUpperCase();
+    let billAddress = same ? shipAddress : (document.getElementById("billAddress")?.value || "").toUpperCase();
+    let billMobile = same ? shipMobile : (document.getElementById("billMobile")?.value || "").toUpperCase();
+    let billGST = same ? shipGST : (document.getElementById("billGST")?.value || "").toUpperCase();
+    let billState = same ? shipState : (document.getElementById("billState")?.value || "").toUpperCase();
+    
+    let invoiceNoVal = (document.getElementById("invoiceNo")?.value || "").toUpperCase();
+    let invoiceDateVal = document.getElementById("invoiceDate")?.value || "";
+    let deliveryNoteVal = (document.getElementById("deliveryNote")?.value || "").toUpperCase();
+    let paymentTermsVal = (document.getElementById("paymentTerms")?.value || "").toUpperCase();
+    let referenceNoVal = (document.getElementById("referenceNo")?.value || "").toUpperCase();
+    let otherRefVal = (document.getElementById("otherReferences")?.value || "").toUpperCase();
+    let buyersOrderNoVal = (document.getElementById("buyersOrderNo")?.value || "").toUpperCase();
+    let buyersOrderDateVal = (document.getElementById("buyersOrderDate")?.value || "").toUpperCase();
+    let dispatchDocNoVal = (document.getElementById("dispatchDocNo")?.value || "").toUpperCase();
+    let deliveryNoteDateVal = (document.getElementById("deliveryNoteDate")?.value || "").toUpperCase();
+    let dispatchThroughVal = (document.getElementById("dispatchThrough")?.value || "").toUpperCase();
+    let destinationVal = (document.getElementById("destination")?.value || "").toUpperCase();
+    let lrNoVal = (document.getElementById("lrNo")?.value || "").toUpperCase();
+    let vehicleNoVal = (document.getElementById("vehicleNo")?.value || "").toUpperCase();
+    
+    let invoiceHtml = `
+    <div class="invoice-page" id="invoice">
+        <div class="title">
+            <div class="original">(ORIGINAL FOR RECIPIENT)</div>
+            <h1>TAX INVOICE</h1>
+            <h3>TAX INVOICE</h3>
+        </div>
+        
+        <div class="top-grid">
+            <div class="left-box">
+                <div class="company-box">
+                    <div class="company-name">MEGHAN CAPCO ENGINEERS</div>
+                    PLOT NO.32, R L NAGAR, KEESARA MANDAL<br>
+                    MEDCHAL DIST - 500062<br>
+                    GSTIN/UIN: 36AEFPY9151B1ZB<br>
+                    MOBILE NO: 9849372405,8897590845
+                </div>
+                <div class="company-box">
+                    <div class="section-title">CONSIGNEE (SHIP TO)</div>
+                    <div class="bold">${shipName || "N/A"}</div>
+                    ${shipAddress.replace(/\n/g, '<br>') || "N/A"}<br>
+                    <b>MOBILE:</b> ${shipMobile || "N/A"}<br>
+                    <b>GSTIN/UIN:</b> ${shipGST || "N/A"}<br>
+                    <b>STATE:</b> ${shipState || "N/A"}
+                </div>
+                <div class="company-box">
+                    <div class="section-title">BUYER (BILL TO)</div>
+                    <div class="bold">${billName || "N/A"}</div>
+                    ${billAddress.replace(/\n/g, '<br>') || "N/A"}<br>
+                    <b>MOBILE:</b> ${billMobile || "N/A"}<br>
+                    <b>GSTIN/UIN:</b> ${billGST || "N/A"}<br>
+                    <b>STATE:</b> ${billState || "N/A"}
+                </div>
+            </div>
+            <div>
+                <table class="meta-table">
+                    <tr>
+                        <td>INVOICE NO.<br><b>${invoiceNoVal || "-"}</b></td>
+                        <td>DATED<br><b>${invoiceDateVal || "-"}</b></td>
+                    </tr>
+                    <tr>
+                        <td>DELIVERY NOTE<br>${deliveryNoteVal || "-"}</td>
+                        <td>MODE/TERMS OF PAYMENT<br>${paymentTermsVal || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>REFERENCE NO. & DATE<br>${referenceNoVal || "-"}</td>
+                        <td>OTHER REFERENCES<br>${otherRefVal || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>BUYER'S ORDER NO.<br>${buyersOrderNoVal || "-"}</td>
+                        <td>DATED<br>${buyersOrderDateVal || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>DISPATCH DOC NO.<br>${dispatchDocNoVal || "-"}</td>
+                        <td>DELIVERY NOTE DATE<br>${deliveryNoteDateVal || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>DISPATCHED THROUGH<br>${dispatchThroughVal || "-"}</td>
+                        <td>DESTINATION<br>${destinationVal || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>BILL OF LADING/LR-RR NO.<br>${lrNoVal || "-"}</td>
+                        <td>MOTOR VEHICLE NO.<br>${vehicleNoVal || "-"}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th style="width:5%">SL NO.</th>
+                    <th style="width:32%">DESCRIPTION OF GOODS</th>
+                    <th style="width:10%">HSN/SAC</th>
+                    <th style="width:12%">QUANTITY</th>
+                    <th style="width:12%">RATE</th>
+                    <th style="width:5%">PER</th>
+                    <th style="width:5%">DISC.%</th>
+                    <th style="width:19%">AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+                <tr class="total-row">
+                    <td colspan="3" class="right"><b>TOTAL</b></td>
+                    <td class="center"><b>-</b></td>
+                    <td colspan="3"></td>
+                    <td class="right"><b>₹ ${formatCurrency(grandTotal)}</b></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="amount-words">
+            <b>AMOUNT CHARGEABLE (IN WORDS)</b><br>
+            <b style="font-size: 12px;">INDIAN RUPEES ${grandTotalWords} ONLY</b>
+        </div>
+        
+        <table class="tax-table">
+            <thead>
+                <tr>
+                    <th>HSN/SAC</th>
+                    <th>TAXABLE VALUE</th>
+                    <th>CENTRAL TAX RATE</th>
+                    <th>CENTRAL TAX AMOUNT</th>
+                    <th>STATE TAX RATE</th>
+                    <th>STATE TAX AMOUNT</th>
+                    <th>TOTAL TAX AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>-</td>
+                    <td>${formatCurrency(taxable)}</td>
+                    <td>9%</td>
+                    <td>${formatCurrency(cgst)}</td>
+                    <td>9%</td>
+                    <td>${formatCurrency(sgst)}</td>
+                    <td>${formatCurrency(cgst + sgst)}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 6px; font-size: 10px;">
+            <b>TAX AMOUNT (IN WORDS) :</b> INDIAN RUPEES ${taxWords} ONLY
+            <br><br>
+            <b>TERMS AND CONDITIONS</b>
+            <ul class="terms-list">
+                <li>GOODS ONCE SOLD WILL NOT BE TAKEN BACK.</li>
+                <li>INTEREST WILL BE CHARGED @ 24% PER ANNUM IF PAYMENT IS NOT MADE WITHIN 30 DAYS.</li>
+                <li>ALL DISPUTES ARE SUBJECT TO SECUNDERABAD JURISDICTION ONLY.</li>
+            </ul>
+        </div>
+        
+        <div class="bottom-grid">
+            <div class="bottom-box">
+                <b>DECLARATION</b><br><br>
+                WE DECLARE THAT THIS INVOICE SHOWS THE ACTUAL PRICE OF THE GOODS DESCRIBED AND THAT ALL PARTICULARS ARE TRUE AND CORRECT.
+                <br><br><br>
+                <b>CUSTOMER'S SEAL AND SIGNATURE</b>
+            </div>
+            <div class="bottom-box">
+                <b>COMPANY'S BANK DETAILS</b><br><br>
+                <b>A/C HOLDER'S NAME :</b> MEGHAN CAPCO ENGINEERS<br>
+                <b>BANK NAME :</b> STATE BANK OF INDIA<br>
+                <b>A/C NO. :</b> 35494157890<br>
+                <b>BRANCH & IFS CODE :</b> CHERLAPALLY & SBIN0016898
+                <br><br>
+                <div style="text-align: right">
+                    <b>FOR MEGHAN CAPCO ENGINEERS</b><br><br><br>
+                    <b>AUTHORISED SIGNATORY</b>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            THIS IS A COMPUTER GENERATED INVOICE
+        </div>
+    </div>
+    <br>
+    <button class="download-btn" onclick="downloadPDF()" style="display: inline-block; margin-bottom: 20px; background: #007bff;">📥 DOWNLOAD PDF</button>
+    `;
+    
+    document.getElementById("invoiceContainer").innerHTML = invoiceHtml;
+    document.getElementById("invoiceContainer").scrollIntoView({ behavior: "smooth" });
+}
+
+function downloadPDF() {
+    const invoice = document.getElementById("invoice");
+    if (!invoice) {
+        alert("Please generate the invoice first!");
+        return;
+    }
+    
+    let now = new Date();
+    let fileName = `Tax_Invoice_MEGHAN_CAPCO_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.pdf`;
+    
+    let opt = {
+        margin: [5, 5, 5, 5], // Small margins to fit more content
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            letterRendering: true, 
+            useCORS: false,
+            scrollY: 0,
+            windowWidth: invoice.scrollWidth,
+            windowHeight: invoice.scrollHeight
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: [240, 350], // Custom size: 240mm x 350mm (wider and taller than A4)
+            orientation: 'portrait' 
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+    
+    html2pdf().set(opt).from(invoice).save();
+}
+
+// Initialize with one product
+document.addEventListener("DOMContentLoaded", function() {
+    addProduct();
+    document.getElementById("buyerFields").style.display = "block";
+    document.getElementById("sameAddress").checked = false;
+});
+</script>
+
+</body>
+</html>
